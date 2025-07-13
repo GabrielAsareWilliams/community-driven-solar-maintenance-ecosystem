@@ -1,4 +1,5 @@
 import { RepairRequestForm } from '@/components/RepairRequestForm'
+import Link from 'next/link'
 
 export default function Home() {
   return (
@@ -16,18 +17,18 @@ export default function Home() {
               Keep your solar investment running at peak efficiency with our expert team.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
+              <Link
                 href="#repair-form"
                 className="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
               >
                 Request Repair
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/track"
                 className="border border-green-600 text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors"
               >
                 Track Request
-              </a>
+              </Link>
             </div>
           </div>
         </div>
