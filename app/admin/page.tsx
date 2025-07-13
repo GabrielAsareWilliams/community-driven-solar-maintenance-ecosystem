@@ -113,12 +113,12 @@ export default function AdminLoginPage() {
             >
               ← Back to Home
             </a>
-            <a
+            {/* <a
               href="/admin/signup"
               className="font-medium text-blue-600 hover:text-blue-500 block"
             >
               Create Admin Account
-            </a>
+            </a> */}
           </div>
         </form>
       </div>
