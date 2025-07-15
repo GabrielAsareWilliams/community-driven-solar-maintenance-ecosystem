@@ -14,6 +14,7 @@ import {
   Pie,
   Cell
 } from 'recharts'
+import Technician from '@/models/Technician'
 
 interface Repair {
   _id: string
@@ -27,6 +28,7 @@ interface Repair {
   notes?: string
   createdAt: string
   updatedAt: string
+  assignedTechnician?: string
 }
 
 interface DashboardStats {
@@ -43,7 +45,8 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [editingRepair, setEditingRepair] = useState<string | null>(null)
-  const [editFields, setEditFields] = useState<Record<string, { status: string; notes: string }>>({})
+  const [editFields, setEditFields] = useState<Record<string, { status: string; notes: string; assignedTechnician?: string }>>({})
+  const [technicians, setTechnicians] = useState<any[]>([])
   const router = useRouter()
 
   useEffect(() => {
@@ -54,6 +57,7 @@ export default function AdminDashboard() {
     }
 
     fetchDashboardData()
+    fetchTechnicians()
   }, [router])
 
   const fetchDashboardData = async () => {
@@ -72,7 +76,7 @@ export default function AdminDashboard() {
       if (repairsResponse.ok && statsResponse.ok) {
         const repairsData = await repairsResponse.json()
         const statsData = await statsResponse.json()
-        // console.log(repairsData)
+        console.log(repairsData)
         setRepairs(repairsData)
         setStats(statsData)
       } else {
@@ -86,22 +90,34 @@ export default function AdminDashboard() {
     }
   }
 
+  const fetchTechnicians = async () => {
+    try {
+      const response = await fetch('/api/admin/technicians')
+      if (response.ok) {
+        const data = await response.json()
+        setTechnicians(data)
+      }
+    } catch (error) {
+      console.error('Error fetching technicians:', error)
+    }
+  }
+
   const handleLogout = () => {
     localStorage.removeItem('adminToken')
     router.push('/admin')
   }
 
   const handleEdit = (repair: Repair) => {
-    console.log(repair)
+    // console.log(repair)
     setEditingRepair(repair._id)
     setEditFields((prev) => ({
       ...prev,
-      [repair._id]: { status: repair.status, notes: repair.notes || '' }
+      [repair._id]: { status: repair.status, notes: repair.notes || '', assignedTechnician: repair.assignedTechnician || '' }
     }))
   }
 
   const handleSave = async (repairId: string) => {
-    const { status, notes } = editFields[repairId]
+    const { status, notes, assignedTechnician } = editFields[repairId]
     try {
       const token = localStorage.getItem('adminToken')
       const response = await fetch(`/api/admin/repairs/${repairId}`, {
@@ -113,6 +129,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({
           status,
           notes,
+          assignedTechnician,
         }),
       })
 
@@ -283,7 +300,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Repairs Table */}
-        <div className="bg-white rounded-lg shadow">
+        <div className="bg-white rounded-lg shadow mb-12">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">Repair Requests</h3>
           </div>
@@ -301,6 +318,9 @@ export default function AdminDashboard() {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Assigned Technician
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Date
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -312,7 +332,7 @@ export default function AdminDashboard() {
                 {repairs.map((repair) => (
                   <tr key={repair._id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="font-mono text-sm text-gray-900">{repair.trackingId}</span>
+                      <span className="font-mono text-sm text-gray-900">{repair.trackingId}#</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
@@ -326,10 +346,17 @@ export default function AdminDashboard() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {repair.assignedTechnician ? (
+                        technicians.find(t => t._id === repair.assignedTechnician)?.name || 'Assigned'
+                      ) : (
+                        <span className="text-gray-400">Unassigned</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(repair.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      {editingRepair === (repair._id) ? (
+                      {editingRepair === repair._id ? (
                         <div className="space-y-2">
                           <select
                             value={editFields[repair._id]?.status || repair.status}
@@ -345,6 +372,21 @@ export default function AdminDashboard() {
                             <option value="IN_PROGRESS">In Progress</option>
                             <option value="COMPLETED">Completed</option>
                             <option value="CANCELLED">Cancelled</option>
+                          </select>
+                          <select
+                            value={editFields[repair._id]?.assignedTechnician || repair.assignedTechnician || ''}
+                            onChange={e =>
+                              setEditFields(prev => ({
+                                ...prev,
+                                [repair._id]: { ...prev[repair._id], assignedTechnician: e.target.value }
+                              }))
+                            }
+                            className="text-sm border border-gray-300 rounded px-2 py-1 w-full"
+                          >
+                            <option value="">Unassigned</option>
+                            {technicians.map(tech => (
+                              <option key={tech._id} value={tech._id}>{tech.name} ({tech.email})</option>
+                            ))}
                           </select>
                           <textarea
                             value={editFields[repair._id]?.notes || ''}
@@ -382,6 +424,33 @@ export default function AdminDashboard() {
                         </button>
                       )}
                     </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Technicians Table */}
+        <div className="bg-white rounded-lg shadow">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">Technicians</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {technicians.map((tech) => (
+                  <tr key={tech._id}>
+                    <td className="px-6 py-4 whitespace-nowrap">{tech.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{tech.email}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{tech.phone || <span className='text-gray-400'>N/A</span>}</td>
                   </tr>
                 ))}
               </tbody>

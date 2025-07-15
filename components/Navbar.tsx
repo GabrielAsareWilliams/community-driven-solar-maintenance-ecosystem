@@ -30,6 +30,7 @@ export default function Navbar() {
           <div className="hidden md:flex space-x-8">
             <Link href="/" className="text-gray-700 hover:text-green-600 font-medium transition-colors">Home</Link>
             <Link href="/track" className="text-gray-700 hover:text-green-600 font-medium transition-colors">Track Request</Link>
+            <Link href="/technicians/signup" className="text-gray-700 hover:text-green-600 font-medium transition-colors">Technicians</Link>
             <Link href="/admin" className="text-gray-700 hover:text-green-600 font-medium transition-colors">Admin</Link>
           </div>
 
@@ -60,6 +61,7 @@ export default function Navbar() {
           <div className="px-2 pt-2 pb-3 space-y-1">
             <Link href="/" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-600">Home</Link>
             <Link href="/track" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-600">Track Request</Link>
+            <Link href="/technicians/signup" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-600">Technicians</Link>
             <Link href="/admin" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-600">Admin</Link>
           </div>
         </div>

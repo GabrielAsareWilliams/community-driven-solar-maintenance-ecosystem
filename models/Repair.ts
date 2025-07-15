@@ -9,6 +9,7 @@ export interface IRepair extends mongoose.Document {
   description: string
   status: 'RECEIVED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
   notes?: string
+  assignedTechnician?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -46,6 +47,10 @@ const repairSchema = new mongoose.Schema<IRepair>(
       default: 'RECEIVED',
     },
     notes: {
+      type: String,
+      required: false,
+    },
+    assignedTechnician: {
       type: String,
       required: false,
     },

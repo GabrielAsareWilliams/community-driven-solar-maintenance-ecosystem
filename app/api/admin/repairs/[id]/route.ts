@@ -36,7 +36,7 @@ export async function PUT(
 
     const { id } = await params
     const body = await request.json()
-    const { status, notes } = body
+    const { status, notes, assignedTechnician } = body
 
     if (!status) {
       return NextResponse.json(
@@ -50,6 +50,7 @@ export async function PUT(
       {
         status,
         notes: notes || null,
+        assignedTechnician: assignedTechnician || null,
       },
       { new: true }
     )
