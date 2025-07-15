@@ -121,7 +121,7 @@ export default function Home() {
               </a>
             </div>
             <p className="text-gray-500 mt-8">
-              © 2026 Solar Panel Maintenance. All rights reserved.
+              © 2025 Solar Panel Maintenance. All rights reserved.
             </p>
           </div>
         </div>
