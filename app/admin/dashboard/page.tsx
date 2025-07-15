@@ -16,7 +16,7 @@ import {
 } from 'recharts'
 
 interface Repair {
-  id: string
+  _id: string
   trackingId: string
   name: string
   email: string
@@ -43,8 +43,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [editingRepair, setEditingRepair] = useState<string | null>(null)
-  const [editNotes, setEditNotes] = useState('')
-  const [editStatus, setEditStatus] = useState<'RECEIVED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'>('RECEIVED')
+  const [editFields, setEditFields] = useState<Record<string, { status: string; notes: string }>>({})
   const router = useRouter()
 
   useEffect(() => {
@@ -73,6 +72,7 @@ export default function AdminDashboard() {
       if (repairsResponse.ok && statsResponse.ok) {
         const repairsData = await repairsResponse.json()
         const statsData = await statsResponse.json()
+        // console.log(repairsData)
         setRepairs(repairsData)
         setStats(statsData)
       } else {
@@ -92,12 +92,16 @@ export default function AdminDashboard() {
   }
 
   const handleEdit = (repair: Repair) => {
-    setEditingRepair(repair.id)
-    setEditNotes(repair.notes || '')
-    setEditStatus(repair.status)
+    console.log(repair)
+    setEditingRepair(repair._id)
+    setEditFields((prev) => ({
+      ...prev,
+      [repair._id]: { status: repair.status, notes: repair.notes || '' }
+    }))
   }
 
   const handleSave = async (repairId: string) => {
+    const { status, notes } = editFields[repairId]
     try {
       const token = localStorage.getItem('adminToken')
       const response = await fetch(`/api/admin/repairs/${repairId}`, {
@@ -107,13 +111,18 @@ export default function AdminDashboard() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          status: editStatus,
-          notes: editNotes,
+          status,
+          notes,
         }),
       })
 
       if (response.ok) {
         setEditingRepair(null)
+        setEditFields((prev) => {
+          const copy = { ...prev }
+          delete copy[repairId]
+          return copy
+        })
         fetchDashboardData()
       }
     } catch (error) {
@@ -236,7 +245,7 @@ export default function AdminDashboard() {
         {stats && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Repairs per Month</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Repair Requests per Month</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={stats.monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -301,7 +310,7 @@ export default function AdminDashboard() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {repairs.map((repair) => (
-                  <tr key={repair.id}>
+                  <tr key={repair._id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="font-mono text-sm text-gray-900">{repair.trackingId}</span>
                     </td>
@@ -320,11 +329,16 @@ export default function AdminDashboard() {
                       {new Date(repair.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      {editingRepair === repair.id ? (
+                      {editingRepair === (repair._id) ? (
                         <div className="space-y-2">
                           <select
-                            value={editStatus}
-                            onChange={(e) => setEditStatus(e.target.value as any)}
+                            value={editFields[repair._id]?.status || repair.status}
+                            onChange={e =>
+                              setEditFields(prev => ({
+                                ...prev,
+                                [repair._id]: { ...prev[repair._id], status: e.target.value }
+                              }))
+                            }
                             className="text-sm border border-gray-300 rounded px-2 py-1"
                           >
                             <option value="RECEIVED">Received</option>
@@ -333,15 +347,20 @@ export default function AdminDashboard() {
                             <option value="CANCELLED">Cancelled</option>
                           </select>
                           <textarea
-                            value={editNotes}
-                            onChange={(e) => setEditNotes(e.target.value)}
+                            value={editFields[repair._id]?.notes || ''}
+                            onChange={e =>
+                              setEditFields(prev => ({
+                                ...prev,
+                                [repair._id]: { ...prev[repair._id], notes: e.target.value }
+                              }))
+                            }
                             placeholder="Add notes..."
                             className="text-sm border border-gray-300 rounded px-2 py-1 w-full"
                             rows={2}
                           />
                           <div className="flex space-x-2">
                             <button
-                              onClick={() => handleSave(repair.id)}
+                              onClick={() => handleSave(repair._id)}
                               className="text-green-600 hover:text-green-900"
                             >
                               Save

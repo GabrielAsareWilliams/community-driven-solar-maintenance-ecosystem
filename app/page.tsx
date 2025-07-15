@@ -1,18 +1,21 @@
 import { RepairRequestForm } from '@/components/RepairRequestForm'
 import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+    <>
+    <Navbar />
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-white">
+      <section className="relative overflow-hidden bg-white bg-[url('/solar5-min1.jpg')] bg-cover bg-center opacity-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
               Solar Panel
               <span className="text-green-600"> Maintenance</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
               Professional solar panel repair and maintenance services. 
               Keep your solar investment running at peak efficiency with our expert team.
             </p>
@@ -34,9 +37,9 @@ export default function Home() {
         </div>
         
         {/* Decorative elements */}
-        <div className="absolute top-0 left-0 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        {/* <div className="absolute top-0 left-0 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
         <div className="absolute top-0 right-0 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-yellow-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-yellow-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div> */}
       </section>
 
       {/* Features Section */}
@@ -124,5 +127,6 @@ export default function Home() {
         </div>
       </footer>
     </div>
+    </>
   )
 }
